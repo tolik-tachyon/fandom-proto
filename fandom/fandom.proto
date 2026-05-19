@@ -1,0 +1,191 @@
+syntax = "proto3";
+
+package fandom;
+
+option go_package = "github.com/yourorg/fandom-service/proto/fandom";
+
+import "google/protobuf/timestamp.proto";
+
+// ─────────────────────────────────────────────
+//  Messages
+// ─────────────────────────────────────────────
+
+message Fandom {
+  string id          = 1;
+  string name        = 2;
+  string description = 3;
+  string image_url   = 4;
+  bool   approved    = 5;
+  string owner_id    = 6;
+  google.protobuf.Timestamp created_at = 7;
+}
+
+message Thread {
+  string id        = 1;
+  string fandom_id = 2;
+  string title     = 3;
+  string author_id = 4;
+  bool   pinned    = 5;
+  google.protobuf.Timestamp created_at = 6;
+}
+
+message Message {
+  string id        = 1;
+  string thread_id = 2;
+  string author_id = 3;
+  string content   = 4;
+  google.protobuf.Timestamp created_at = 5;
+}
+
+message Group {
+  string id          = 1;
+  string fandom_id   = 2;
+  string name        = 3;
+  string description = 4;
+  string owner_id    = 5;
+  google.protobuf.Timestamp created_at = 6;
+}
+
+message GroupMember {
+  string group_id  = 1;
+  string user_id   = 2;
+  string role      = 3; // "member" | "admin"
+  google.protobuf.Timestamp joined_at = 4;
+}
+
+// ─────────────────────────────────────────────
+//  Fandom RPCs
+// ─────────────────────────────────────────────
+
+message CreateFandomRequest {
+  string name        = 1;
+  string description = 2;
+  string image_url   = 3;
+  string owner_id    = 4;
+}
+message CreateFandomResponse { Fandom fandom = 1; }
+
+message GetFandomRequest  { string id = 1; }
+message GetFandomResponse { Fandom fandom = 1; }
+
+message ListFandomsRequest  { int32 page = 1; int32 limit = 2; }
+message ListFandomsResponse { repeated Fandom fandoms = 1; int32 total = 2; }
+
+message UpdateFandomRequest {
+  string id          = 1;
+  string name        = 2;
+  string description = 3;
+  string image_url   = 4;
+}
+message UpdateFandomResponse { Fandom fandom = 1; }
+
+message DeleteFandomRequest  { string id = 1; }
+message DeleteFandomResponse { bool success = 1; }
+
+// ─────────────────────────────────────────────
+//  Thread RPCs
+// ─────────────────────────────────────────────
+
+message CreateThreadRequest {
+  string fandom_id = 1;
+  string title     = 2;
+  string author_id = 3;
+}
+message CreateThreadResponse { Thread thread = 1; }
+
+message GetThreadRequest  { string id = 1; }
+message GetThreadResponse { Thread thread = 1; }
+
+message ListThreadsRequest  { string fandom_id = 1; int32 page = 2; int32 limit = 3; }
+message ListThreadsResponse { repeated Thread threads = 1; int32 total = 2; }
+
+message PinThreadRequest  { string id = 1; bool pinned = 2; }
+message PinThreadResponse { Thread thread = 1; }
+
+message DeleteThreadRequest  { string id = 1; }
+message DeleteThreadResponse { bool success = 1; }
+
+// ─────────────────────────────────────────────
+//  Message RPCs
+// ─────────────────────────────────────────────
+
+message CreateMessageRequest {
+  string thread_id = 1;
+  string author_id = 2;
+  string content   = 3;
+}
+message CreateMessageResponse { Message message = 1; }
+
+message GetMessageRequest  { string id = 1; }
+message GetMessageResponse { Message message = 1; }
+
+message ListMessagesRequest  { string thread_id = 1; int32 page = 2; int32 limit = 3; }
+message ListMessagesResponse { repeated Message messages = 1; int32 total = 2; }
+
+message DeleteMessageRequest  { string id = 1; }
+message DeleteMessageResponse { bool success = 1; }
+
+// ─────────────────────────────────────────────
+//  Group RPCs
+// ─────────────────────────────────────────────
+
+message CreateGroupRequest {
+  string fandom_id   = 1;
+  string name        = 2;
+  string description = 3;
+  string owner_id    = 4;
+}
+message CreateGroupResponse { Group group = 1; }
+
+message GetGroupRequest  { string id = 1; }
+message GetGroupResponse { Group group = 1; }
+
+message ListGroupsRequest  { string fandom_id = 1; int32 page = 2; int32 limit = 3; }
+message ListGroupsResponse { repeated Group groups = 1; int32 total = 2; }
+
+message InviteToGroupRequest  { string group_id = 1; string user_id = 2; }
+message InviteToGroupResponse { bool success = 1; }
+
+message JoinGroupRequest  { string group_id = 1; string user_id = 2; string invite_token = 3; }
+message JoinGroupResponse { GroupMember member = 1; }
+
+message ListGroupMembersRequest  { string group_id = 1; }
+message ListGroupMembersResponse { repeated GroupMember members = 1; }
+
+message RemoveGroupMemberRequest  { string group_id = 1; string user_id = 2; }
+message RemoveGroupMemberResponse { bool success = 1; }
+
+// ─────────────────────────────────────────────
+//  Service Definition (16 endpoints total)
+// ─────────────────────────────────────────────
+
+service FandomService {
+  // Fandom (5)
+  rpc CreateFandom (CreateFandomRequest) returns (CreateFandomResponse);
+  rpc GetFandom    (GetFandomRequest)    returns (GetFandomResponse);
+  rpc ListFandoms  (ListFandomsRequest)  returns (ListFandomsResponse);
+  rpc UpdateFandom (UpdateFandomRequest) returns (UpdateFandomResponse);
+  rpc DeleteFandom (DeleteFandomRequest) returns (DeleteFandomResponse);
+
+  // Thread (5)
+  rpc CreateThread (CreateThreadRequest) returns (CreateThreadResponse);
+  rpc GetThread    (GetThreadRequest)    returns (GetThreadResponse);
+  rpc ListThreads  (ListThreadsRequest)  returns (ListThreadsResponse);
+  rpc PinThread    (PinThreadRequest)    returns (PinThreadResponse);
+  rpc DeleteThread (DeleteThreadRequest) returns (DeleteThreadResponse);
+
+  // Message (4)
+  rpc CreateMessage (CreateMessageRequest) returns (CreateMessageResponse);
+  rpc GetMessage    (GetMessageRequest)    returns (GetMessageResponse);
+  rpc ListMessages  (ListMessagesRequest)  returns (ListMessagesResponse);
+  rpc DeleteMessage (DeleteMessageRequest) returns (DeleteMessageResponse);
+
+  // Group (7)
+  rpc CreateGroup        (CreateGroupRequest)        returns (CreateGroupResponse);
+  rpc GetGroup           (GetGroupRequest)           returns (GetGroupResponse);
+  rpc ListGroups         (ListGroupsRequest)         returns (ListGroupsResponse);
+  rpc InviteToGroup      (InviteToGroupRequest)      returns (InviteToGroupResponse);
+  rpc JoinGroup          (JoinGroupRequest)          returns (JoinGroupResponse);
+  rpc ListGroupMembers   (ListGroupMembersRequest)   returns (ListGroupMembersResponse);
+  rpc RemoveGroupMember  (RemoveGroupMemberRequest)  returns (RemoveGroupMemberResponse);
+}

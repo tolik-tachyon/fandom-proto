@@ -28,8 +28,8 @@ jobs:
             --go_out=fandompb --go_opt=paths=source_relative \
             --go-grpc_out=fandompb --go-grpc_opt=paths=source_relative \
             fandom/fandom.proto
-          find fandompb -name "*.go" -not -path "fandompb/*.go" -exec mv {} fandompb/ \;
-          find fandompb -mindepth 1 -type d -exec rm -rf {} + 2>/dev/null || true
+          mkdir -p fandompb
+          mv fandom/*.go fandompb/
 
       - name: Push to generated repo
         run: |

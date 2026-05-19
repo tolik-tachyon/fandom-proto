@@ -2,8 +2,6 @@ name: Generate Proto
 
 on:
   push:
-    paths:
-      - 'fandom/**'
 
 jobs:
   generate:

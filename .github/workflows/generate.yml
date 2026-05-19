@@ -3,7 +3,7 @@ name: Generate Proto
 on:
   push:
     paths:
-      - 'proto/**'
+      - 'fandom/**'
 
 jobs:
   generate:
@@ -25,13 +25,17 @@ jobs:
 
       - name: Generate
         run: |
+          mkdir -p fandompb
           protoc \
-            --go_out=. --go_opt=paths=source_relative \
-            --go-grpc_out=. --go-grpc_opt=paths=source_relative \
+            --go_out=fandompb --go_opt=paths=source_relative \
+            --go-grpc_out=fandompb --go-grpc_opt=paths=source_relative \
             fandom/fandom.proto
 
-      - name: Commit
+      - name: Push to generated repo
         run: |
+          git clone https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/tolik-tachyon/fandom-proto-generated.git gen-repo
+          cp -r fandompb/ gen-repo/fandompb/
+          cd gen-repo
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           git add .
